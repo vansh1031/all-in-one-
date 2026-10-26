@@ -1,6 +1,6 @@
 __pycache__/
 *.pyc
 *.pyo
-zone_config.json
-*.task
-*.tflite
+*.swp
+settings.json
+hazard_log.txt
