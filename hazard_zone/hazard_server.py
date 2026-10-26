@@ -16,7 +16,8 @@ from flask import Flask, Response, jsonify, request, send_from_directory
 
 from detector_engine import BASE_DIR, HazardEngine, SerialLink
 
-WEB_DIR = os.path.join(BASE_DIR, "web")
+WEB_DIR    = os.path.join(BASE_DIR, "web")
+ASSETS_DIR = os.path.join(os.path.dirname(BASE_DIR), "assets")
 
 app = Flask(__name__, static_folder=WEB_DIR, static_url_path="/static")
 engine = HazardEngine()
@@ -31,7 +32,7 @@ def index():
 
 @app.route("/logo.svg")
 def logo():
-    return send_from_directory(BASE_DIR, "yash_logo.svg")
+    return send_from_directory(ASSETS_DIR, "yash_logo.svg")
 
 
 @app.route("/video_feed")

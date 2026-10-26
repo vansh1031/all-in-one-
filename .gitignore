@@ -2,5 +2,6 @@ __pycache__/
 *.pyc
 *.pyo
 *.swp
-settings.json
-hazard_log.txt
+*/logs/
+*/config/settings.json
+predictive_maintenance/config/pm_model.json

@@ -37,11 +37,13 @@ except Exception:            # missing package or missing GPU/EGL libraries
     mp = None
 
 BASE_DIR      = os.path.dirname(os.path.abspath(__file__))
-ZONE_FILE     = os.path.join(BASE_DIR, "zone_config.json")
-SETTINGS_FILE = os.path.join(BASE_DIR, "settings.json")
-LOG_FILE      = os.path.join(BASE_DIR, "hazard_log.txt")
-HAND_MODEL    = os.path.join(BASE_DIR, "hand_landmarker.task")
-FACE_MODEL    = os.path.join(BASE_DIR, "face_detector.tflite")
+CONFIG_DIR    = os.path.join(BASE_DIR, "config")
+LOG_DIR       = os.path.join(BASE_DIR, "logs")
+ZONE_FILE     = os.path.join(CONFIG_DIR, "zone_config.json")
+SETTINGS_FILE = os.path.join(CONFIG_DIR, "settings.json")
+LOG_FILE      = os.path.join(LOG_DIR, "hazard_log.txt")
+HAND_MODEL    = os.path.join(BASE_DIR, "models", "hand_landmarker.task")
+FACE_MODEL    = os.path.join(BASE_DIR, "models", "face_detector.tflite")
 
 DEFAULT_SETTINGS = {
     "source":        "camera",    # "camera" | "simulator"
@@ -337,6 +339,8 @@ class SimulatedScene:
 # ─── ENGINE ───────────────────────────────────────────────
 class HazardEngine:
     def __init__(self):
+        os.makedirs(CONFIG_DIR, exist_ok=True)
+        os.makedirs(LOG_DIR, exist_ok=True)
         self._lock       = threading.RLock()
         self._stop       = threading.Event()
         self._thread     = None
