@@ -30,8 +30,9 @@ import numpy as np
 
 try:
     import serial
+    from serial.tools import list_ports
 except ImportError:
-    serial = None
+    serial = list_ports = None
 
 BASE_DIR      = os.path.dirname(os.path.abspath(__file__))
 CONFIG_DIR    = os.path.join(BASE_DIR, "config")
@@ -139,7 +140,19 @@ class SerialSensors:
 
     @staticmethod
     def available_ports():
-        return sorted(glob.glob("/dev/ttyACM*") + glob.glob("/dev/ttyUSB*"))
+        """Serial ports present now: COM3, COM4... on Windows, /dev/tty* on Linux."""
+        ports = [p.device for p in list_ports.comports()] if list_ports else []
+        if os.name != "nt":
+            ports += glob.glob("/dev/ttyACM*") + glob.glob("/dev/ttyUSB*")
+        return sorted(set(ports))
+
+    @classmethod
+    def auto_ports(cls):
+        """Ports to try on "auto": USB serial devices only (the sensor board)."""
+        if os.name == "nt":
+            return [p.device for p in list_ports.comports() if p.vid is not None] if list_ports else []
+        return cls.AUTO_PORTS + [p for p in cls.available_ports()
+                                 if p not in cls.AUTO_PORTS and ("ACM" in p or "USB" in p)]
 
     @property
     def connected(self):
@@ -157,7 +170,7 @@ class SerialSensors:
         if serial is None or time.time() - self._last_try < 5:
             return
         self._last_try = time.time()
-        for port in (self.AUTO_PORTS if self.wanted == "auto" else [self.wanted]):
+        for port in (self.auto_ports() if self.wanted == "auto" else [self.wanted]):
             try:
                 self.ser = serial.Serial(port=port, baudrate=self.baud, timeout=0.5)
                 self.port = port
@@ -322,7 +335,7 @@ class MaintenanceEngine:
         stamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(event["t"]))
         print(f"[{level.upper()}] {msg}")
         try:
-            with open(LOG_FILE, "a") as f:
+            with open(LOG_FILE, "a", encoding="utf-8") as f:
                 f.write(f"{stamp}  {level.upper():5}  {msg}\n")
         except OSError:
             pass

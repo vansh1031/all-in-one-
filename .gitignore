@@ -5,3 +5,4 @@ __pycache__/
 */logs/
 */config/settings.json
 predictive_maintenance/config/pm_model.json
+.venv/

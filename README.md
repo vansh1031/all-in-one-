@@ -27,8 +27,8 @@ visual-inspection/
 │   └── logs/                     #   pm_log.txt (created at runtime)
 ├── assets/                       # shared branding (YASH logo)
 ├── scripts/
-│   ├── start_hazard_zone.sh
-│   └── start_predictive_maintenance.sh
+│   ├── start_hazard_zone.sh / .bat
+│   └── start_predictive_maintenance.sh / .bat
 ├── start_server.sh               # kept for the existing systemd service, starts the hazard detector
 └── requirements.txt
 ```
@@ -39,7 +39,7 @@ visual-inspection/
 - **Libraries:** OpenCV, MediaPipe, NumPy, Flask, PySerial
 - **Hardware:** Arduino (buzzer / sensor board), USB camera
 
-## 🚀 Setup
+## 🚀 Setup (Jetson / Linux)
 ```bash
 git clone https://github.com/vansh1031/visual-inspection.git
 cd visual-inspection
@@ -51,6 +51,28 @@ pip install -r requirements.txt
 Both servers accept connections from the Jetson itself only. To open them from another
 machine, set `HAZARD_HOST=0.0.0.0` or `PM_HOST=0.0.0.0` before starting. Anyone who can
 reach the port can then control the app.
+
+## 🪟 Running on Windows
+1. Install **Python 3.12 (64-bit)** from https://www.python.org/downloads/ and tick
+   **"Add python.exe to PATH"** in the installer.
+2. Open **Command Prompt** in the project folder and install the libraries into a virtual
+   environment:
+   ```bat
+   python -m venv .venv
+   .venv\Scripts\pip install -r requirements.txt
+   ```
+3. Double-click **`scripts\start_hazard_zone.bat`** or **`scripts\start_predictive_maintenance.bat`**.
+   Each one starts its server and opens the app in your browser after a few seconds.
+   Close the black window to stop the app.
+
+On Windows:
+- The Arduino shows up as a **COM port** (for example `COM3`). **Auto-detect** finds USB devices
+  such as the Arduino; you can also pick the port in ⚙️ Settings. Only one app can use a COM port
+  at a time, so close the Arduino IDE's Serial Monitor first.
+- The camera opens through DirectShow. If the wrong camera shows (for example the laptop's
+  built-in one), change **Camera index** in ⚙️ Settings to `1`.
+- The first time a server starts, Windows Firewall may ask about network access. You can click
+  **Cancel**, because the apps only listen on this PC.
 
 ---
 
@@ -74,7 +96,7 @@ clear and brakes to an emergency stop when someone enters.
 - If the Arduino is unplugged and plugged back in during an alarm, the alarm is sent again.
 - Resetting the zone or stopping monitoring turns the buzzer off.
 
-**Arduino buzzer** (9600 baud, auto-detects `/dev/ttyACM0`, `/dev/ttyACM1`, `/dev/ttyUSB0`, `/dev/ttyUSB1`):
+**Arduino buzzer** (9600 baud; auto-detects `/dev/ttyACM*` / `/dev/ttyUSB*` on Linux, USB COM ports on Windows):
 `D\n` = person detected (buzzer on), `S\n` = safe (buzzer off).
 
 ---

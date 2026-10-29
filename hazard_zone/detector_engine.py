@@ -26,8 +26,9 @@ import numpy as np
 
 try:
     import serial
+    from serial.tools import list_ports
 except ImportError:          # the UI still works, the buzzer just stays offline
-    serial = None
+    serial = list_ports = None
 
 try:
     import mediapipe as mp
@@ -107,8 +108,20 @@ class SerialLink:
 
     @staticmethod
     def available_ports():
-        ports = glob.glob("/dev/ttyACM*") + glob.glob("/dev/ttyUSB*")
-        return sorted(ports)
+        """Serial ports present now: COM3, COM4... on Windows, /dev/tty* on Linux."""
+        ports = [p.device for p in list_ports.comports()] if list_ports else []
+        if os.name != "nt":
+            ports += glob.glob("/dev/ttyACM*") + glob.glob("/dev/ttyUSB*")
+        return sorted(set(ports))
+
+    @classmethod
+    def auto_ports(cls):
+        """Ports to try on "auto": USB serial devices only (the Arduino), so a
+        built-in or Bluetooth serial port is never mistaken for the buzzer."""
+        if os.name == "nt":
+            return [p.device for p in list_ports.comports() if p.vid is not None] if list_ports else []
+        return cls.AUTO_PORTS + [p for p in cls.available_ports()
+                                 if p not in cls.AUTO_PORTS and ("ACM" in p or "USB" in p)]
 
     @property
     def connected(self):
@@ -129,7 +142,7 @@ class SerialLink:
         if time.time() - self._last_try < self.RETRY_SECONDS:
             return False
         self._last_try = time.time()
-        ports = self.AUTO_PORTS if self.wanted == "auto" else [self.wanted]
+        ports = self.auto_ports() if self.wanted == "auto" else [self.wanted]
         for port in ports:
             try:
                 ser = serial.Serial(port=port, baudrate=self.baud, timeout=1)
@@ -424,7 +437,7 @@ class HazardEngine:
         stamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(event["t"]))
         print(f"[{level.upper()}] {msg}")
         try:
-            with open(LOG_FILE, "a") as f:
+            with open(LOG_FILE, "a", encoding="utf-8") as f:
                 f.write(f"{stamp}  {level.upper():5}  {msg}\n")
         except OSError:
             pass
@@ -659,7 +672,9 @@ class HazardEngine:
     # ── Capture loop ──────────────────────────────────────
     def _open_camera(self):
         s = self.settings
-        cap = cv2.VideoCapture(s["camera_index"])
+        # DirectShow opens USB webcams far more reliably than the default on Windows.
+        backend = cv2.CAP_DSHOW if os.name == "nt" else cv2.CAP_ANY
+        cap = cv2.VideoCapture(s["camera_index"], backend)
         if not cap.isOpened():
             cap.release()
             return None
