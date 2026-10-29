@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+*.pyo
+*.swp
+*/logs/
+*/config/settings.json
+predictive_maintenance/config/pm_model.json
