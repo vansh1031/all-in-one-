@@ -20,13 +20,20 @@ Both apps have a **Simulator** mode, so you can check that everything works befo
    **Code → Download ZIP** and unzip it, for example to `C:\visual-inspection`.
    With Git installed, you can run `git clone https://github.com/vansh1031/visual-inspection.git` instead.
 3. **Double-click `install_windows.bat`.** It creates a private Python environment (`.venv`),
-   installs the libraries (the first time takes about 5 minutes) and runs a setup check.
-   The check should end with `Result: ready to run`.
+   installs the libraries (the first time takes about 5 minutes), runs a setup check and puts
+   two shortcuts on your Desktop and in the Start menu. The check should end with
+   `Result: ready to run`.
+   **This step is required.** Without it the apps stop with `No module named 'flask'`.
 
 ### Every day
-- Double-click **`start_all.bat`**. Two windows open, one per app, and the browser opens both apps.
-- To run only one app, double-click `scripts\start_hazard_zone.bat` or `scripts\start_predictive_maintenance.bat`.
-- **To stop:** close the black window(s).
+- **Start:** double-click **Visual Inspection** on the Desktop (or `start_all.bat`).
+  Both apps start in the background **with no windows**. The browser opens each app as soon as
+  it's ready. The first start after installing can take up to a minute.
+- **Stop:** double-click **Stop Visual Inspection** (or `stop_all.bat`).
+- If an app can't start, a message box explains why and names the log file
+  (`hazard_zone\logs\server_output.log` or `predictive_maintenance\logs\server_output.log`).
+- **Troubleshooting:** `scripts\start_hazard_zone.bat` and `scripts\start_predictive_maintenance.bat`
+  run one app with a console window, so you can watch its output live.
 
 ### Windows notes
 - The Arduino appears as a **COM port** (for example `COM3`). Auto-detect finds it; to choose it
@@ -141,10 +148,11 @@ It changes nothing, and it prints a hint next to anything that is wrong.
 
 | Problem | Fix |
 |---------|-----|
+| `ModuleNotFoundError: No module named 'flask'` (or another module) | Setup wasn't run, or Python was started outside `.venv`. Double-click `install_windows.bat` (Jetson: `./install_jetson.sh`) and start the app again |
 | `Python was not found` (Windows) | Install Python 3.12 and tick "Add python.exe to PATH", then run `install_windows.bat` again |
 | `python3 -m venv` fails (Jetson) | `sudo apt install python3-venv`, then run `./install_jetson.sh` again |
 | MediaPipe will not install | Use Python **3.12**. Newer versions may not have a MediaPipe build yet. The apps still run without it (body detection only) |
-| Page does not open / "can't reach this page" | The server isn't running: start it again and wait about 5 seconds. Make sure nothing else uses ports 8765/8766 |
+| Browser shows "This site can't be reached" / `ERR_CONNECTION_REFUSED` | The app isn't running (yet). Start it with the **Visual Inspection** shortcut, which opens the browser only once the app is ready. Opening a bookmark or the dashboard card before starting the app gives this page |
 | "CAMERA NOT AVAILABLE" | Plug in the camera, close other apps using it (Zoom, Teams, Camera app), or try another **Camera index** |
 | Arduino shows "offline" | Check the USB cable; close the Arduino Serial Monitor; on Jetson add yourself to `dialout`; pick the port in ⚙️ Settings |
 | Buzzer sounds when nobody is there | The camera was lost and the fail-safe kept the machine stopped. Fix the camera, or turn off **Fail-safe** in ⚙️ Settings |

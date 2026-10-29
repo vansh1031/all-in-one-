@@ -1,19 +1,30 @@
 @echo off
-rem Starts the Edge AI Predictive Maintenance on http://127.0.0.1:8766
-rem and opens it in the default browser. Close this window to stop it.
-title Edge AI Predictive Maintenance
+rem Starts the Predictive Maintenance and opens it in the browser when it is ready.
+rem This version keeps a console window open to show the server output, which
+rem helps with troubleshooting. For everyday use, use the "Visual Inspection"
+rem shortcut or start_all.bat, which run without windows.
+title Predictive Maintenance
+setlocal
 cd /d "%~dp0..\predictive_maintenance"
 
-set PY=python
-if exist "%~dp0..\.venv\Scripts\python.exe" set PY="%~dp0..\.venv\Scripts\python.exe"
-
-rem Open the browser once the server has had a few seconds to start.
-start "" /b cmd /c "timeout /t 4 /nobreak >nul & start http://127.0.0.1:8766/start"
-
-%PY% pm_server.py
-if errorlevel 1 (
+set "PY=%~dp0..\.venv\Scripts\python.exe"
+if not exist "%PY%" (
+  echo Setup has not been run on this computer yet.
   echo.
-  echo The server stopped with an error. Check that Python is installed and that
-  echo "pip install -r requirements.txt" was run from the project folder.
+  echo Double-click install_windows.bat in the project folder, wait until it
+  echo says "Setup finished", then start the app again.
+  echo.
   pause
+  exit /b 1
 )
+
+echo Starting the Predictive Maintenance...
+echo The browser opens by itself when the app is ready. Keep this window open.
+echo.
+set OPEN_BROWSER=1
+"%PY%" pm_server.py
+
+echo.
+echo The app has stopped. If you did not stop it yourself, the reason is shown above.
+echo Run install_windows.bat again, or send a screenshot of this window for help.
+pause

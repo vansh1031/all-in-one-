@@ -10,7 +10,13 @@ opens the full application instead of spawning separate windows.
 
 import json
 import os
+import socket
+import threading
 import time
+import webbrowser
+
+if __name__ == "__main__":
+    print("Loading the Hazardous Zone Detector (the first start can take up to a minute)...", flush=True)
 
 from flask import Flask, Response, jsonify, request, send_from_directory
 
@@ -132,8 +138,38 @@ def sim():
     return jsonify(ok=True)
 
 
+def port_in_use(host, port):
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        return s.connect_ex(("127.0.0.1" if host == "0.0.0.0" else host, port)) == 0
+
+
+def open_browser_when_ready(port, url):
+    """Print the address and open it in the browser once the server answers.
+
+    Opening on a timer showed "connection refused" whenever the first start
+    (loading OpenCV / MediaPipe, antivirus scans on Windows) took longer.
+    """
+    def wait():
+        for _ in range(240):
+            if port_in_use("127.0.0.1", port):
+                print(f"\nReady: {url}\n", flush=True)
+                if os.environ.get("OPEN_BROWSER") == "1":
+                    webbrowser.open(url)
+                return
+            time.sleep(0.5)
+    threading.Thread(target=wait, daemon=True).start()
+
+
 if __name__ == "__main__":
     host = os.environ.get("HAZARD_HOST", "127.0.0.1")
     port = int(os.environ.get("HAZARD_PORT", "8765"))
+    url = f"http://127.0.0.1:{port}/start"
+    if port_in_use(host, port):
+        # Usually the app is already running (started twice); just show it.
+        print(f"Port {port} is already in use - the app is probably already running: {url}")
+        if os.environ.get("OPEN_BROWSER") == "1":
+            webbrowser.open(url)
+        raise SystemExit(0)
     engine.start()
+    open_browser_when_ready(port, url)
     app.run(host=host, port=port, threaded=True)

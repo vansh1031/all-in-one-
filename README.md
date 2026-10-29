@@ -29,9 +29,11 @@ visual-inspection/
 ├── scripts/
 │   ├── start_hazard_zone.sh / .bat
 │   ├── start_predictive_maintenance.sh / .bat
-│   └── check_setup.py            # checks Python, libraries, models, camera, serial ports
+│   ├── check_setup.py            # checks Python, libraries, models, camera, serial ports
+│   └── launcher.py               # starts/stops the apps in the background, makes the shortcuts
 ├── install_windows.bat / install_jetson.sh   # one-time setup
 ├── start_all.bat / start_all.sh              # start both apps
+├── stop_all.bat                              # stop them (Windows)
 ├── SETUP_GUIDE.md                # step-by-step setup and troubleshooting
 ├── start_server.sh               # kept for the existing systemd service, starts the hazard detector
 └── requirements.txt
@@ -49,7 +51,8 @@ visual-inspection/
 | | Windows | Jetson / Linux |
 |---|---|---|
 | 1. Install (once) | double-click `install_windows.bat` | `./install_jetson.sh` |
-| 2. Start both apps | double-click `start_all.bat` | `./start_all.sh` |
+| 2. Start both apps | **Visual Inspection** Desktop shortcut (or `start_all.bat`), runs with no windows | `./start_all.sh` |
+| Stop | **Stop Visual Inspection** shortcut (or `stop_all.bat`) | Ctrl+C |
 | Start on boot | — | `./install_jetson.sh --service` |
 | Check the setup | `.venv\Scripts\python scripts\check_setup.py` | `.venv/bin/python scripts/check_setup.py` |
 

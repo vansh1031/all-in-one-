@@ -6,3 +6,6 @@ __pycache__/
 */config/settings.json
 predictive_maintenance/config/pm_model.json
 .venv/
+.run.json
+.make_shortcut.ps1
+assets/visual_inspection.ico

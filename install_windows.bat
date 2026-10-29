@@ -39,10 +39,16 @@ echo.
 ".venv\Scripts\python.exe" scripts\check_setup.py
 
 echo.
+echo Creating Desktop and Start menu shortcuts...
+".venv\Scripts\python.exe" scripts\launcher.py --shortcuts
+
+echo.
 echo Setup finished.
-echo   Start both apps:  double-click start_all.bat
-echo   Hazard detector:  http://127.0.0.1:8765/start
-echo   Maintenance:      http://127.0.0.1:8766/start
+echo   Start:  double-click "Visual Inspection" on the Desktop (or start_all.bat)
+echo   Stop:   double-click "Stop Visual Inspection" (or stop_all.bat)
+echo   The apps run in the background with no windows and open in your browser:
+echo     Hazard detector:  http://127.0.0.1:8765/start
+echo     Maintenance:      http://127.0.0.1:8766/start
 echo.
 pause
 exit /b 0
