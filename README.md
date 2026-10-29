@@ -1,4 +1,4 @@
-# 🏭 Industrial Safety & Maintenance AI
+# 🏭 Visual Inspection: Industrial Safety & Maintenance AI
 
 Two edge-AI applications for the NVIDIA Jetson Orin, each running on one browser screen:
 
@@ -11,7 +11,7 @@ Both apps include a built-in **simulator**, so you can run and demo them without
 
 ## 📁 Project Structure
 ```
-hazardious/
+visual-inspection/
 ├── hazard_zone/                  # 🚨 Hazardous Zone Detector
 │   ├── hazard_server.py          #   web server: UI, video stream, API (port 8765)
 │   ├── detector_engine.py        #   camera/simulator, detectors, zone + buzzer logic
@@ -41,8 +41,8 @@ hazardious/
 
 ## 🚀 Setup
 ```bash
-git clone https://github.com/vansh1031/hazardious.git
-cd hazardious
+git clone https://github.com/vansh1031/visual-inspection.git
+cd visual-inspection
 pip install -r requirements.txt
 
 ./scripts/start_hazard_zone.sh              # → http://127.0.0.1:8765/start
