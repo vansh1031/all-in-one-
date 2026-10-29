@@ -28,7 +28,11 @@ visual-inspection/
 ├── assets/                       # shared branding (YASH logo)
 ├── scripts/
 │   ├── start_hazard_zone.sh / .bat
-│   └── start_predictive_maintenance.sh / .bat
+│   ├── start_predictive_maintenance.sh / .bat
+│   └── check_setup.py            # checks Python, libraries, models, camera, serial ports
+├── install_windows.bat / install_jetson.sh   # one-time setup
+├── start_all.bat / start_all.sh              # start both apps
+├── SETUP_GUIDE.md                # step-by-step setup and troubleshooting
 ├── start_server.sh               # kept for the existing systemd service, starts the hazard detector
 └── requirements.txt
 ```
@@ -39,40 +43,21 @@ visual-inspection/
 - **Libraries:** OpenCV, MediaPipe, NumPy, Flask, PySerial
 - **Hardware:** Arduino (buzzer / sensor board), USB camera
 
-## 🚀 Setup (Jetson / Linux)
-```bash
-git clone https://github.com/vansh1031/visual-inspection.git
-cd visual-inspection
-pip install -r requirements.txt
+## 🚀 Quick start
+**Full step-by-step instructions and troubleshooting: [SETUP_GUIDE.md](SETUP_GUIDE.md)**
 
-./scripts/start_hazard_zone.sh              # → http://127.0.0.1:8765/start
-./scripts/start_predictive_maintenance.sh   # → http://127.0.0.1:8766/start
-```
-Both servers accept connections from the Jetson itself only. To open them from another
+| | Windows | Jetson / Linux |
+|---|---|---|
+| 1. Install (once) | double-click `install_windows.bat` | `./install_jetson.sh` |
+| 2. Start both apps | double-click `start_all.bat` | `./start_all.sh` |
+| Start on boot | — | `./install_jetson.sh --service` |
+| Check the setup | `.venv\Scripts\python scripts\check_setup.py` | `.venv/bin/python scripts/check_setup.py` |
+
+Windows needs Python 3.12 (64-bit) from python.org with "Add python.exe to PATH" ticked.
+
+Both servers accept connections from this computer only. To open them from another
 machine, set `HAZARD_HOST=0.0.0.0` or `PM_HOST=0.0.0.0` before starting. Anyone who can
 reach the port can then control the app.
-
-## 🪟 Running on Windows
-1. Install **Python 3.12 (64-bit)** from https://www.python.org/downloads/ and tick
-   **"Add python.exe to PATH"** in the installer.
-2. Open **Command Prompt** in the project folder and install the libraries into a virtual
-   environment:
-   ```bat
-   python -m venv .venv
-   .venv\Scripts\pip install -r requirements.txt
-   ```
-3. Double-click **`scripts\start_hazard_zone.bat`** or **`scripts\start_predictive_maintenance.bat`**.
-   Each one starts its server and opens the app in your browser after a few seconds.
-   Close the black window to stop the app.
-
-On Windows:
-- The Arduino shows up as a **COM port** (for example `COM3`). **Auto-detect** finds USB devices
-  such as the Arduino; you can also pick the port in ⚙️ Settings. Only one app can use a COM port
-  at a time, so close the Arduino IDE's Serial Monitor first.
-- The camera opens through DirectShow. If the wrong camera shows (for example the laptop's
-  built-in one), change **Camera index** in ⚙️ Settings to `1`.
-- The first time a server starts, Windows Firewall may ask about network access. You can click
-  **Cancel**, because the apps only listen on this PC.
 
 ---
 
@@ -131,18 +116,10 @@ The speed value is optional.
 
 ---
 
-## ⚙️ Auto-start on boot (systemd)
-`hazard-server.service` can keep running `start_server.sh`; it now starts the detector from its
-new folder. The old `hazard-detector.service` started the Tkinter launcher, which no longer
-exists, so disable it:
-```bash
-sudo systemctl disable --now hazard-detector.service
-sudo systemctl restart hazard-server.service
-```
-To start predictive maintenance on boot, create a second service with (the quotes matter because of the space):
-```ini
-ExecStart="/home/jetiot/Downloads/Hazardous Zone/scripts/start_predictive_maintenance.sh"
-```
+## ⚙️ Auto-start on boot (Jetson)
+`./install_jetson.sh --service` sets up `hazard-server` and `pm-server` systemd services and
+turns off the old `hazard-detector.service` (the Tkinter launcher). See
+[SETUP_GUIDE.md](SETUP_GUIDE.md#start-automatically-on-boot) for the status and log commands.
 
 ## 🌐 Dashboard integration
 - Hazardous Zone Detector card → `http://127.0.0.1:8765/start`
