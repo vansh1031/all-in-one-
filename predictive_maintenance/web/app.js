@@ -115,7 +115,7 @@ class LineChart {
       lo -= pad; hi += pad;
       if (this.zeroFloor) lo = Math.max(0, lo);
     }
-    const ticks = niceTicks(lo, hi, 4);
+    const ticks = niceTicks(lo, hi, H < 140 ? 2 : 4);    // fewer gridlines on short charts
     if (!this.fixed) { lo = Math.min(lo, ticks[0]); hi = Math.max(hi, ticks[ticks.length - 1]); }
     const Y = (v) => T + (1 - (v - lo) / (hi - lo)) * (H - T - B);
 
@@ -143,7 +143,8 @@ class LineChart {
     // X labels
     ctx.textAlign = "center";
     ctx.textBaseline = "alphabetic";
-    const step = [10, 15, 30, 60, 120, 180, 300].find((s) => range / s <= 5) || 300;
+    const maxLabels = Math.max(2, Math.min(5, Math.floor((W - L - R) / 60)));  // keep labels apart
+    const step = [10, 15, 30, 60, 120, 180, 300, 600].find((s) => range / s <= maxLabels) || 600;
     for (let t = Math.ceil(t0 / step) * step; t <= now; t += step) {
       ctx.fillText(fmtClock(t).slice(range > 120 ? 0 : 3, range > 120 ? 5 : 8), X(t), H - 4);
     }
@@ -164,7 +165,8 @@ class LineChart {
       if (y1 - y0 > 14) ctx.fillText("normal", L + 6, y0 + 3);
     }
 
-    // Threshold lines + labels
+    // Threshold lines + labels (a label is skipped when it would overlap the previous one)
+    let lastLabelY = -Infinity;
     for (const th of this.thresholds) {
       const y = Math.round(Y(th.value())) + 0.5;
       ctx.strokeStyle = th.color;
@@ -174,7 +176,10 @@ class LineChart {
       ctx.fillStyle = css("--muted");
       ctx.textAlign = "left";
       ctx.textBaseline = "bottom";
-      ctx.fillText(`${th.label} ${th.value()}`, L + 6, y - 3);
+      if (Math.abs(y - lastLabelY) >= 14 && y - T >= 12) {
+        ctx.fillText(`${th.label} ${th.value()}`, L + 6, y - 3);
+        lastLabelY = y;
+      }
     }
 
     if (!pts.length) {

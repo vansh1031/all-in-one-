@@ -92,6 +92,22 @@ On Windows, download the ZIP again (keep your `hazard_zone\config` folder) and r
 
 ---
 
+## 🖥️ Screens and kiosk mode
+The layout adapts to the screen. It was tested on 7" (800×480) and 10" (1024×600) touchscreens,
+laptops (1366×768), Full HD, QHD and 4K monitors, tablets and phones.
+- **Landscape screens** keep the status panel beside the video or charts, so nothing needs scrolling.
+- **Portrait tablets and phones** stack the panels; scroll down for the status and log.
+- **Very large screens** at 100% scaling are enlarged automatically so the text stays readable.
+
+For a dedicated screen, press the ⛶ **Full screen** button in the top bar. To open straight into
+full screen on the Jetson (press Alt+F4 to leave):
+```bash
+chromium-browser --kiosk http://127.0.0.1:8765/start
+```
+On Windows, press **F11** in the browser.
+
+---
+
 ## ✅ First-run checklist
 
 **Hazardous Zone Detector**
